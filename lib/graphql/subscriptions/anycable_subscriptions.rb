@@ -223,7 +223,8 @@ module GraphQL
       end
 
       def write_subscription_id(channel, val)
-        channel.connection.anycable_socket.istate["sid"] = val
+        socket = channel.connection.try(:anycable_socket) || channel.connection.try(:socket)
+        socket.istate["sid"] = val
         channel.instance_variable_set(:@__sid__, val)
       end
 
@@ -231,12 +232,13 @@ module GraphQL
         # For Rails integration
         return channel.__istate__ if channel.respond_to?(:__istate__)
 
-        return unless channel.connection.socket.istate
+        socket = channel.connection.try(:anycable_socket) || channel.connection.try(:socket)
+        return unless socket.istate
 
-        if channel.connection.socket.istate[channel.identifier]
-          JSON.parse(channel.connection.socket.istate[channel.identifier])
+        if socket.istate[channel.identifier]
+          JSON.parse(socket.istate[channel.identifier])
         else
-          channel.connection.socket.istate
+          socket.istate
         end
       end
     end
