@@ -224,7 +224,7 @@ module GraphQL
 
       def write_subscription_id(channel, val)
         socket = channel.connection.try(:anycable_socket) || channel.connection.try(:socket)
-        socket.istate["sid"] = val
+        socket.istate["sid"] = val if socket.try(:istate)
         channel.instance_variable_set(:@__sid__, val)
       end
 
@@ -233,7 +233,7 @@ module GraphQL
         return channel.__istate__ if channel.respond_to?(:__istate__)
 
         socket = channel.connection.try(:anycable_socket) || channel.connection.try(:socket)
-        return unless socket.istate
+        return unless socket.try(:istate)
 
         if socket.istate[channel.identifier]
           JSON.parse(socket.istate[channel.identifier])
